@@ -21,7 +21,7 @@ setup(
     packages = find_packages('src'),
     package_dir = {'' : 'src'},
     scripts = [
-        'src/scripts/fourboxdsync'
+        ''
     ],
     classifiers = [
         'Intended Audience :: Developers',
@@ -30,6 +30,9 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     install_requires = [
+        'requests==2.7.0',
+        'simplejson==3.7.3',
+        'wsgiref==0.1.2'
     ],
     zip_safe = False
 )
