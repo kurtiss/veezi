@@ -30,8 +30,14 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     install_requires = [
+        'beautifulsoup4==4.3.2',
+        'enum34==1.0.4',
+        'jdcal==1.0',
+        'openpyxl==2.2.3',
+        'python-dateutil==2.4.2',
         'requests==2.7.0',
         'simplejson==3.7.3',
+        'six==1.9.0',
         'wsgiref==0.1.2'
     ],
     zip_safe = False
