@@ -2,7 +2,7 @@ language: python
 python:
   - 2.7.9
 install:
-  python setup.py develop
+  python setup.py install
 before_script:
   mkdir -p shippable/testresults
 script:
