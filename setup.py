@@ -40,5 +40,9 @@ setup(
         'six==1.9.0',
         'wsgiref==0.1.2'
     ],
+    tests_require = [
+        'nose==1.3.7'
+    ],
+    test_suite = 'nose.collector',
     zip_safe = False
 )

@@ -17,6 +17,7 @@ scratch.py
 
 #buildout/virtualenv cruft
 bin/*
+man/*
 lib
 include
 share
