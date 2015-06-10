@@ -13,6 +13,7 @@
 # wing cruft
 *.wpr
 
+shippable/*
 scratch.py
 
 #buildout/virtualenv cruft
