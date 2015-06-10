@@ -5,4 +5,4 @@ python:
 before_script:
   mkdir -p shippable/testresults
 script:
-  - python setup.py test --with-xunit --xunit-file=shippable/testresults/nosetests.xml
+  - python setup.py test
