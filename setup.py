@@ -5,11 +5,23 @@ setup.py
 """
 
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
 import os
 
 MODNAME = "veezi"
-
 execfile(os.path.join('src', MODNAME, 'version.py'))
+
+
+class NoseTestCommand(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import nose
+        nose.run_exit(argv=['nosetests'])
+
 
 setup(
     name = MODNAME,
@@ -43,6 +55,8 @@ setup(
     tests_require = [
         'nose==1.3.7'
     ],
-    test_suite = 'nose.collector',
+    cmdclass = dict(
+        test = NoseTestCommand
+    ),
     zip_safe = False
 )
