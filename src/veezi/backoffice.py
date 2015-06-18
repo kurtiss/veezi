@@ -10,6 +10,7 @@ import datetime
 import dateutil.parser
 import enum
 import json
+import logging
 import more_itertools
 import openpyxl
 import re
@@ -17,6 +18,13 @@ import tempfile
 import urlparse
 
 from . import transport
+from . import loggers
+
+
+log = loggers.getLogger(__name__)
+
+def _log_row_type(row_type, row):
+	log.debug(u"{0}: {1}".format(row_type, u" | ".join(unicode(c.value) for c in row)))
 
 
 class Reports(enum.Enum):
@@ -47,6 +55,7 @@ class BackofficeSession(object):
 
 	ROOT = "https://my.us.veezi.com{0}"
 	LOGIN_ROOT = "https://my.veezi.com{0}"
+	MAX_BOR_DAYS = 365242
 	_REPORT_PATTERN = re.compile(r'"ExportUrlBase"\:(?P<value>"[^"]+")')
 
 	@classmethod
@@ -79,7 +88,8 @@ class BackofficeSession(object):
 		j = json.loads(r.text)
 		return j
 
-	def sessions(self, start_date, days = 365242):
+	def sessions(self, start_date, days = None):
+		days = days if days is not None else self.MAX_BOR_DAYS
 		r = self.http.post(
 			self._url("/programming/getsessionview/{0}".format(self.site_id)),
 			data = dict(
@@ -186,14 +196,16 @@ class BackofficeSession(object):
 
 			while rows_it.peek(None) is not None:
 				distrib_row = rows_it.next()
-				print "distrib_row:", " | ".join(unicode(c.value) for c in distrib_row)
+				_log_row_type("DISTRIBUTOR", distrib_row)
+
 				distrib_name, film_name = distrib_row[0].value.split("  -  ", 1)
 				end_film_value = "{0} total".format(film_name)
 				end_distrib_value = "{0} total".format(distrib_name)
 
 				while rows_it.peek()[0].value != end_film_value:
 					site_screen_row = rows_it.next()
-					print "site_screen_row", " | ".join(unicode(c.value) for c in site_screen_row)
+					_log_row_type("SITE & SCREEN", site_screen_row)
+
 					site_screen_value = site_screen_row[0].value
 					site_name, screen_name = site_screen_value.split("  -  ", 1)
 					end_site_value = "{0} total".format(site_screen_value)
@@ -202,47 +214,51 @@ class BackofficeSession(object):
 
 					while rows_it.peek()[0].value != end_site_value:
 						showdate_row = rows_it.next()
-						print "showdate_row", " | ".join(unicode(c.value) for c in showdate_row)
+						_log_row_type("SHOWDATE", showdate_row)
+
 						showdate_value = showdate_row[0].value
 						end_showdate_value = "{0} total".format(showdate_value)
 						showdate_dt = dateutil.parser.parse(showdate_value)
 
 						while rows_it.peek()[0].value != end_showdate_value:
 							showtime_row = rows_it.next()
-							print "showtime_row", " | ".join(unicode(c.value) for c in showtime_row)
+							_log_row_type("SHOWTIME", showtime_row)
+
 							showtime_value = showtime_row[0].value
 							full_showtime_value = "{0} {1}".format(showdate_value, showtime_value)
 							end_showtime_value = "{0} total".format(showtime_value)
 							full_showtime_dt = dateutil.parser.parse(full_showtime_value)
 
-							sales = dict()
+							tickets = dict()
 
 							while rows_it.peek()[0].value != end_showtime_value:
 								tt_row = rows_it.next()
-								print "tt_row", " | ".join(unicode(c.value) for c in tt_row)
+								_log_row_type("TICKET TYPE", tt_row)
+
 								tt_name = tt_row[0].value
-								sales[tt_name] = dict(
-									name = tt_name,
-									sales = self._get_cell_value(tt_row, report_key_offsets, 'SALES'),
-									refunds = self._get_cell_value(tt_row, report_key_offsets, 'REFUNDS'),
-									admits = self._get_cell_value(tt_row, report_key_offsets, 'ADMITS'),
-									gross_price = self._get_cell_value(tt_row, report_key_offsets, 'GROSS PRICE'),
-									net_price = self._get_cell_value(tt_row, report_key_offsets, 'NET PRICE'),
-									net_total = self._get_cell_value(tt_row, report_key_offsets, 'NET TOTAL'),
-									tax_total = self._get_cell_value(tt_row, report_key_offsets, 'TAX TOTAL'),
-									gross_total = self._get_cell_value(tt_row, report_key_offsets, 'GROSS TOTAL')
-								)
+								if tt_name is not None:
+									tickets[tt_name] = dict(
+										name = tt_name,
+										sales = self._get_cell_value(tt_row, report_key_offsets, 'SALES'),
+										refunds = self._get_cell_value(tt_row, report_key_offsets, 'REFUNDS'),
+										admits = self._get_cell_value(tt_row, report_key_offsets, 'ADMITS'),
+										gross_price = self._get_cell_value(tt_row, report_key_offsets, 'GROSS PRICE'),
+										net_price = self._get_cell_value(tt_row, report_key_offsets, 'NET PRICE'),
+										net_total = self._get_cell_value(tt_row, report_key_offsets, 'NET TOTAL'),
+										tax_total = self._get_cell_value(tt_row, report_key_offsets, 'TAX TOTAL'),
+										gross_total = self._get_cell_value(tt_row, report_key_offsets, 'GROSS TOTAL')
+									)
 							end_showtime_row = rows_it.next()
-							print "end_showtime_row", " | ".join(unicode(c.value) for c in end_showtime_row)
+							_log_row_type("END SHOWTIME", end_showtime_row)
 
 							showtimes.append(dict(
 								screen_name = screen_name,
 								showtime = full_showtime_dt,
-								sales = sales
+								tickets = tickets
 							))
 
 						end_showdate_row = rows_it.next()
-						print "end_showdate_row", " | ".join(unicode(c.value) for c in end_showdate_row)
+						_log_row_type("END SHOWDATE", end_showdate_row)
 
 					engagement_key = (site_name, film_name)
 
@@ -257,13 +273,14 @@ class BackofficeSession(object):
 						)
 
 					end_site_row = rows_it.next()
-					print "end_site_row", " | ".join(unicode(c.value) for c in end_site_row)
+					_log_row_type("END SITE", end_site_row)
+
 				end_film_row = rows_it.next()
-				print "end_film_row", " | ".join(unicode(c.value) for c in end_film_row)
+				_log_row_type("END FILM", end_film_row)
 
 				if rows_it.peek()[0].value == end_distrib_value:
 					end_distrib_row = rows_it.next()
-					print "end_distrib_row", " | ".join(unicode(c.value) for c in end_distrib_row)
+					_log_row_type("END DISTRIBUTOR", end_distrib_row)
 
 					# consume any blank rows
 					while True:
@@ -271,7 +288,7 @@ class BackofficeSession(object):
 						if post_distrib_row != False:
 							if not filter(None, [c.value for c in post_distrib_row]):
 								blank_row = rows_it.next()
-								print "blank_row:", " | ".join(unicode(c.value) for c in distrib_row)
+								_log_row_type("BLANK", blank_row)
 								continue
 						break
 

@@ -4,8 +4,11 @@
 libveezi.py
 """
 
+import collections
 import datetime
 import dateutil.parser
+
+from . import backoffice
 
 
 class VeeziClient(object):
@@ -23,8 +26,10 @@ class VeeziClient(object):
 			end_date or datetime.datetime.now()
 		)
 
-	def showtimes(self, start_date = None, end_date = None):
+	def showdata(self, start_date = None, end_date = None):
 		start_date = start_date or self.CINEMA_EPOCH
+		if not end_date:
+			end_date = start_date + datetime.timedelta(days = backoffice.BackofficeSession.MAX_BOR_DAYS)
 
 		screens = self.api.screen()
 		screens_by_name = dict()
@@ -33,53 +38,40 @@ class VeeziClient(object):
 			screens_by_name[screen["Name"]] = screen
 
 		bor = self._box_office_report(start_date = start_date, end_date = end_date)
-		sessions = self.bo.sessions(start_date)
+		sessions = self.bo.sessions(start_date, days = (end_date - start_date).days)
 
+		film_names_by_showkey = dict()
 		films = dict()
-		showtimes = dict()
+		shows = dict()
 
 		for (site_name, film_name), engagement in bor.items():
-			for showtime in engagement["showtimes"]:
-				screen_id = screens_by_name[showtime["screen_name"]]["Id"]
+			for show in engagement["showtimes"]:
+				screen_name = show["screen_name"]
+				screen = screens_by_name[screen_name]
+				screen_id = screen["Id"]
+				showtime = show["showtime"]
 
-				try:
-					screen_showtimes = showtimes[screen_id]
-				except KeyError:
-					screen_showtimes = showtimes[screen_id] = dict()
-
-				screen_showtimes[showtime["showtime"]] = dict(
-					film_name = film_name,
-					sales = showtime["sales"]
-				)
-
-		screenless_sessions = []
-		showtimeless_sessions = []
+				show_key = (showtime, screen_id)
+				shows[show_key] = dict(tickets = show["tickets"])
+				film_names_by_showkey[show_key] = film_name
 
 		for session in sessions:
 			screen_id = session["screenId"]
-			showtime_dt = dateutil.parser.parse(session["start"])
-
-			try:
-				showtime_screen = showtimes[screen_id]
-			except KeyError:
-				screenless_sessions.append(session)
-				continue
-
-			try:
-				showtime = showtime_screen[showtime_dt]
-			except KeyError:
-				showtimeless_sessions.append(session)
-				continue
-
-			film_name = showtime.pop("film_name")
+			showtime = dateutil.parser.parse(session["start"])
+			show_key = (showtime, screen_id)
 			film_id = session["filmId"]
-			showtime["session"] = session
-			showtime["film_id"] = film_id
-			films[film_id] = dict(name = film_name)
+
+			try:
+				show = shows[show_key]
+			except KeyError:
+				show = shows[show_key] = dict(tickets = dict())
+			else:
+				film_name = film_names_by_showkey[show_key]
+				films[film_id] = dict(id = film_id, name = film_name)
+
+			show["session"] = session
 
 		return dict(
 			films = films,
-			showtimes = showtimes,
-			screenless_sessions = screenless_sessions,
-			showtimeless_sessions = showtimeless_sessions
+			shows = shows
 		)
