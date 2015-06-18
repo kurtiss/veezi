@@ -45,6 +45,7 @@ setup(
         'beautifulsoup4==4.3.2',
         'enum34==1.0.4',
         'jdcal==1.0',
+        'more-itertools==2.2',
         'openpyxl==2.2.3',
         'python-dateutil==2.4.2',
         'requests==2.7.0',
