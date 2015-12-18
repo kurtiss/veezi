@@ -68,3 +68,7 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# temporary
+scratch2.py
+showdata.*
