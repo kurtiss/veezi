@@ -15,7 +15,8 @@ import more_itertools
 import openpyxl
 import re
 import tempfile
-import urlparse
+
+from urllib.parse import urlparse
 
 from . import transport
 from . import loggers

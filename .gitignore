@@ -1,54 +1,70 @@
-# mac cruft
-.DS_Store
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-#emacs cruft
-*~
-*#*
-*flymake.py
-.ropeproject
+# C extensions
+*.so
 
-# vim cruft
-*.swp
-
-# wing cruft
-*.wpr
-
-shippable/*
-scratch.py
-
-#buildout/virtualenv cruft
-bin/*
-man/*
-lib
-include
-share
+# Distribution / packaging
 .Python
-bootstrap.py
-develop-eggs
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
 .installed.cfg
-
-#python cruft
 *.egg
-*.egg-info
-.noseids
-*prof*
+
+# pyenv
+.python-version
+
+# pyvenv
+pyvenv.cfg
+bin/
+
+# sqlite database
+db.sqlite3
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
 pip-log.txt
-*.pyc
+pip-delete-this-directory.txt
+pip-selfcheck.json
 
-# test cruft
-*_test
+# Unit test / coverage reports
+htmlcov/
+.tox/
 .coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
 
-# Sphinx cruft
-_build
+# Translations
+*.mo
+*.pot
 
-# backup cruft
-*.old
-
-# Misc cruft
+# Django stuff:
 *.log
-*.pid
 
-# temp
-scratch2.py
-showdata.*
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
