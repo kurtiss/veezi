@@ -10,8 +10,8 @@ import os
 
 MODNAME = "veezi"
 with open(os.path.join('src', MODNAME, 'version.py')) as version_file:
-    code = compile(f.read(), "version.py", 'exec')
-    exec(code, global_vars, local_vars)
+    code = compile(version_file.read(), "version.py", 'exec')
+    exec(code, dict(), dict())
 
 class NoseTestCommand(TestCommand):
     def finalize_options(self):
