@@ -48,3 +48,7 @@ _build
 # Misc cruft
 *.log
 *.pid
+
+# temp
+scratch2.py
+showdata.*

@@ -41,6 +41,7 @@ class VeeziClient(object):
 		sessions = self.bo.sessions(start_date, days = (end_date - start_date).days)
 
 		film_names_by_showkey = dict()
+		distrib_names_by_showkey = dict()
 		films = dict()
 		shows = dict()
 
@@ -54,6 +55,7 @@ class VeeziClient(object):
 				show_key = (showtime, screen_id)
 				shows[show_key] = dict(tickets = show["tickets"])
 				film_names_by_showkey[show_key] = film_name
+				distrib_names_by_showkey[show_key] = engagement["distributor_name"]
 
 		for session in sessions:
 			screen_id = session["screenId"]
@@ -67,7 +69,8 @@ class VeeziClient(object):
 				show = shows[show_key] = dict(tickets = dict())
 			else:
 				film_name = film_names_by_showkey[show_key]
-				films[film_id] = dict(id = film_id, name = film_name)
+				distributor_name = distrib_names_by_showkey[show_key]
+				films[film_id] = dict(id = film_id, name = film_name, distributor_name = distributor_name)
 
 			show["session"] = session
 

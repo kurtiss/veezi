@@ -265,7 +265,7 @@ class BackofficeSession(object):
 					try:
 						engagement = engagements[engagement_key]
 					except KeyError:
-						engegament = engagements[engagement_key] = dict(
+						engagement = engagements[engagement_key] = dict(
 							site_name = site_name,
 							film_name = film_name,
 							distributor_name = distrib_name,

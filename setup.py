@@ -9,8 +9,9 @@ from setuptools.command.test import test as TestCommand
 import os
 
 MODNAME = "veezi"
-execfile(os.path.join('src', MODNAME, 'version.py'))
-
+with open(os.path.join('src', MODNAME, 'version.py')) as version_file:
+    code = compile(f.read(), "version.py", 'exec')
+    exec(code, global_vars, local_vars)
 
 class NoseTestCommand(TestCommand):
     def finalize_options(self):
