@@ -24,7 +24,7 @@ from . import loggers
 log = loggers.getLogger(__name__)
 
 def _log_row_type(row_type, row):
-	log.debug("{0}: {1}".format(row_type, " | ".join(c.value for c in row)))
+	log.debug("{0}: {1}".format(row_type, " | ".join((c.value or "") for c in row)))
 
 
 class Reports(enum.Enum):
