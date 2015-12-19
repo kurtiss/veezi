@@ -9,6 +9,10 @@ from . import backoffice
 from . import libveezi
 from . import transport
 
+import pkg_resources as _pkg_resources
+
+
+__version__ =_pkg_resources.get_distribution(__name__).version
 
 def client(username, password, api_access_token):
 	http = transport.HttpSession()
