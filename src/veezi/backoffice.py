@@ -195,7 +195,7 @@ class BackofficeSession(object):
 			more_itertools.consume(rows_it, 11)
 
 			while rows_it.peek(None) is not None:
-				distrib_row = rows_it.next()
+				distrib_row = next(rows_it)
 				_log_row_type("DISTRIBUTOR", distrib_row)
 
 				distrib_name, film_name = distrib_row[0].value.split("  -  ", 1)
@@ -203,7 +203,7 @@ class BackofficeSession(object):
 				end_distrib_value = "{0} total".format(distrib_name)
 
 				while rows_it.peek()[0].value != end_film_value:
-					site_screen_row = rows_it.next()
+					site_screen_row = next(rows_it)
 					_log_row_type("SITE & SCREEN", site_screen_row)
 
 					site_screen_value = site_screen_row[0].value
@@ -213,7 +213,7 @@ class BackofficeSession(object):
 					showtimes = []
 
 					while rows_it.peek()[0].value != end_site_value:
-						showdate_row = rows_it.next()
+						showdate_row = next(rows_it)
 						_log_row_type("SHOWDATE", showdate_row)
 
 						showdate_value = showdate_row[0].value
@@ -221,7 +221,7 @@ class BackofficeSession(object):
 						showdate_dt = dateutil.parser.parse(showdate_value)
 
 						while rows_it.peek()[0].value != end_showdate_value:
-							showtime_row = rows_it.next()
+							showtime_row = next(rows_it)
 							_log_row_type("SHOWTIME", showtime_row)
 
 							showtime_value = showtime_row[0].value
@@ -232,7 +232,7 @@ class BackofficeSession(object):
 							tickets = dict()
 
 							while rows_it.peek()[0].value != end_showtime_value:
-								tt_row = rows_it.next()
+								tt_row = next(rows_it)
 								_log_row_type("TICKET TYPE", tt_row)
 
 								tt_name = tt_row[0].value
@@ -248,7 +248,7 @@ class BackofficeSession(object):
 										tax_total = self._get_cell_value(tt_row, report_key_offsets, 'TAX TOTAL'),
 										gross_total = self._get_cell_value(tt_row, report_key_offsets, 'GROSS TOTAL')
 									)
-							end_showtime_row = rows_it.next()
+							end_showtime_row = next(rows_it)
 							_log_row_type("END SHOWTIME", end_showtime_row)
 
 							showtimes.append(dict(
@@ -257,7 +257,7 @@ class BackofficeSession(object):
 								tickets = tickets
 							))
 
-						end_showdate_row = rows_it.next()
+						end_showdate_row = next(rows_it)
 						_log_row_type("END SHOWDATE", end_showdate_row)
 
 					engagement_key = (site_name, film_name)
@@ -272,14 +272,14 @@ class BackofficeSession(object):
 							showtimes = showtimes,
 						)
 
-					end_site_row = rows_it.next()
+					end_site_row = next(rows_it)
 					_log_row_type("END SITE", end_site_row)
 
-				end_film_row = rows_it.next()
+				end_film_row = next(rows_it)
 				_log_row_type("END FILM", end_film_row)
 
 				if rows_it.peek()[0].value == end_distrib_value:
-					end_distrib_row = rows_it.next()
+					end_distrib_row = next(rows_it)
 					_log_row_type("END DISTRIBUTOR", end_distrib_row)
 
 					# consume any blank rows
@@ -287,7 +287,7 @@ class BackofficeSession(object):
 						post_distrib_row = rows_it.peek(False)
 						if post_distrib_row != False:
 							if not filter(None, [c.value for c in post_distrib_row]):
-								blank_row = rows_it.next()
+								blank_row = next(rows_it)
 								_log_row_type("BLANK", blank_row)
 								continue
 						break
@@ -301,9 +301,9 @@ class BackofficeSession(object):
 		end = object()
 
 		while cells_i.peek(end) != end:
-			i, cell = cells_i.next()
+			i, cell = next(cells_i)
 			if expect_keys_i.peek(end) == cell.value:
-				expect_key = expect_keys_i.next()
+				expect_key = next(expect_keys_i)
 				offsets[expect_key] = i
 
 		return offsets
