@@ -5,4 +5,4 @@ version.py
 Created by Kurtiss Hare
 """
 
-VERSION = "2015.06.18"
+VERSION = "2015.6.18"
