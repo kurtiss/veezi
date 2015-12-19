@@ -15,8 +15,7 @@ import more_itertools
 import openpyxl
 import re
 import tempfile
-
-from urllib.parse import urlparse
+import urllib
 
 from . import transport
 from . import loggers
@@ -331,8 +330,8 @@ class BackofficeSession(object):
 		export_url_base = json.loads(
 			self._REPORT_PATTERN.search(r.text).group("value")
 		)
-		export_url_base_p = urlparse.urlparse(export_url_base)
-		export_url_base_params = urlparse.parse_qs(export_url_base_p.query, True)
+		export_url_base_p = urllib.parse.urlparse(export_url_base)
+		export_url_base_params = urllib.parse.parse_qs(export_url_base_p.query, True)
 		export_url_base_params["Format"] = "EXCELOPENXML"
 
 		with tempfile.NamedTemporaryFile(prefix = export_url_base_params["FileName"][0], mode = 'r+b') as erf:
