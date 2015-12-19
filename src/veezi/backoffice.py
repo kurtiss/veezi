@@ -24,7 +24,7 @@ from . import loggers
 log = loggers.getLogger(__name__)
 
 def _log_row_type(row_type, row):
-	log.debug(u"{0}: {1}".format(row_type, u" | ".join(unicode(c.value) for c in row)))
+	log.debug("{0}: {1}".format(row_type, " | ".join(c.value for c in row)))
 
 
 class Reports(enum.Enum):
@@ -137,7 +137,7 @@ class BackofficeSession(object):
 				distributor_name = tds[1].text,
 				release_date = datetime.datetime.strptime(tr.find("td", class_="date").text, "%m/%d/%Y"),
 				genre = tds[3].text,
-				is_active = tds[4].text.strip() == u"Active"
+				is_active = tds[4].text.strip() == "Active"
 			))
 
 		return films
