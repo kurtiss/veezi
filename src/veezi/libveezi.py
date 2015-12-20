@@ -69,12 +69,13 @@ class VeeziClient(object):
 				result[screen_id] = site
 		return result
 
-	def _screens(self):
+	def _screens(self, sites_by_screen_id):
 		screens = self.api_session.screen()
 		result = dict()
 
 		for screen in screens:
 			result[screen["Id"]] = dict(
+				site_id = sites_by_screen_id[screen["Id"]]["id"],
 				id = screen["Id"],
 				name = screen["Name"],
 				number = int(screen["ScreenNumber"]),
@@ -102,7 +103,7 @@ class VeeziClient(object):
 
 		sites = self._sites()
 		sites_by_screen_id = self._sites_by_screen_id(sites)
-		screens = self._screens()
+		screens = self._screens(sites_by_screen_id)
 		screens_by_name = self._screens_by_name(screens)
 		bor = self._box_office_report(start_date = start_date, end_date = end_date)
 		sessions = self.backoffice_session.sessions(start_date, days = (end_date - start_date).days)
@@ -141,7 +142,6 @@ class VeeziClient(object):
 					name = film_name,
 					distributor_name = distributor_name
 				)
-
 			show.update(dict(
 				advance_revenue = session["advanceRevenue"],
 				cleanup_duration = session["cleanupDuration"],
@@ -167,7 +167,8 @@ class VeeziClient(object):
 				show_type = session["showType"],
 				start = session["start"],
 				validation_errors = session["validationErrors"],
-				site_id = site_id
+				site_id = site_id,
+				screen_id = screen_id
 			))
 
 		return dict(
