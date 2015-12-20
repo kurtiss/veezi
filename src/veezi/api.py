@@ -26,18 +26,16 @@ class VeeziApi(object):
 	def _url(self, path):
 		return self.ROOT.format(path)
 
-	def session(self):
-		r = self._get(self._url("/session"))
+	def session(self, session_id = None):
+		if session_id:
+			r = self._get(self._url("/session/{0}".format(id)))
+		else:
+			r = self._get(self._url("/session"))
 		j = json.loads(r.text)
 		return j
 
 	def film(self, id):
 		r = self._get(self._url("/film/{0}".format(id)))
-		j = json.loads(r.text)
-		return j
-
-	def session(self, id):
-		r = self._get(self._url("/session/{0}".format(id)))
 		j = json.loads(r.text)
 		return j
 

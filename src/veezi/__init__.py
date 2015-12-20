@@ -16,6 +16,10 @@ __version__ =_pkg_resources.get_distribution(__name__).version
 
 def client(username, password, api_access_token):
 	http = transport.HttpSession()
-	bo = backoffice.BackofficeSession.login(username, password)
-	a = api.VeeziApi(api_access_token, http = http)
-	return libveezi.VeeziClient(a, bo)
+	backoffice_session = backoffice.BackofficeSession.login(
+		username,
+		password,
+		http = http,
+	)
+	api_session = api.VeeziApi(api_access_token, http = http)
+	return libveezi.VeeziClient(backoffice_session, api_session)

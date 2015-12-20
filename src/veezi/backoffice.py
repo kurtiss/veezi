@@ -17,6 +17,7 @@ import re
 import tempfile
 import urllib
 
+from .constants import DEFAULT_SITE_ID
 from . import transport
 from . import loggers
 
@@ -64,15 +65,14 @@ class BackofficeSession(object):
 		return r.format(path)
 
 	@classmethod
-	def login(cls, username, password, http = None, site_id = 9999):
+	def login(cls, username, password, http = None):
 		http = http or transport.HttpSession()
-		result = cls(http, site_id)
+		result = cls(http)
 		result._login(username, password)
 		return result
 
-	def __init__(self, http, site_id):
+	def __init__(self, http):
 		self.http = http
-		self.site_id = site_id
 
 	def _login(self, username, password):
 		self.http.post(self._url("/authentication/signin", root = self.LOGIN_ROOT),
@@ -83,19 +83,19 @@ class BackofficeSession(object):
 			)
 		)
 
-	def sitedetail(self):
-		r = self.http.get(self._url("/programming/getsitedetail/{0}".format(self.site_id)))
+	def sitedetail(self, site_id = DEFAULT_SITE_ID):
+		r = self.http.get(self._url("/programming/getsitedetail/{0}".format(site_id)))
 		j = json.loads(r.text)
 		return j
 
-	def sessions(self, start_date, days = None):
+	def sessions(self, start_date, days = None, site_id = DEFAULT_SITE_ID):
 		days = days if days is not None else self.MAX_BOR_DAYS
 		r = self.http.post(
-			self._url("/programming/getsessionview/{0}".format(self.site_id)),
+			self._url("/programming/getsessionview/{0}".format(site_id)),
 			data = dict(
 				startDate = start_date.isoformat(),
 				days = days,
-				siteId = self.site_id
+				siteId = site_id
 			)
 		)
 		j = json.loads(r.text)
@@ -145,14 +145,14 @@ class BackofficeSession(object):
 	def distributors_by_film_and_ticket_type_report(self, start_date, end_date,
 			distributor_id = "", film_id = "", exclude_complimentaries = False,
 			new_page_for_each = NewPageForEach.nothing, detail_level = DetailLevel.showtime_by_ticket_type,
-			multi_feature_revenue = MultiFeatureRevenue.full_revenue_per_film):
+			multi_feature_revenue = MultiFeatureRevenue.full_revenue_per_film, site_id = DEFAULT_SITE_ID):
 
 		dbfattr = self._report_workbook(
 			Reports.distributors_by_film_and_ticket_type,
 			dict(
 				P193_From = start_date.strftime("%Y-%m-%d"),
 				P193_To = end_date.strftime("%Y-%m-%d"),
-				P194 = self.site_id,
+				P194 = site_id,
 				P199 = distributor_id,
 				P198 = film_id,
 				P195 = "Y" if exclude_complimentaries else "N",
