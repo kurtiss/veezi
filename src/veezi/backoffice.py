@@ -44,7 +44,7 @@ class DetailLevel(enum.Enum):
 	film_by_day_and_ticket_type = "FilmDayTicket"
 	film_by_screen_and_day = "FilmScreenDay"
 	showtime = "Show"
-	showtime_by_ticket_type = "ShowTicket"
+	showtime_by_ticket_type = "FilmScreenShowTicket"
 
 
 class MultiFeatureRevenue(enum.Enum):
